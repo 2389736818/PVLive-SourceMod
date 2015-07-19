@@ -19,12 +19,15 @@ This radio player is similar in design to other sourcemod radios but requires no
 ### Screenshots
 
 ![Main Radio Menu](https://raw.githubusercontent.com/BravelyBlue/PVLive-SourceMod/master/docs/radio_menu.png)
+
 Main `!radio` Menu
 
 ![Volume Menu](https://raw.githubusercontent.com/BravelyBlue/PVLive-SourceMod/master/docs/volume_menu.png)
+
 `!volume` Menu
 
 ![Song Updates](https://raw.githubusercontent.com/BravelyBlue/PVLive-SourceMod/master/docs/song_updates.png)
+
 Live in game updates of song info
 
 ### Commands
@@ -44,10 +47,12 @@ Live in game updates of song info
 ### Auto-Generated Config
 
 * Auto generated config: PVLPonyRadio.cfg
-* cvars:
-** `CreateConVar("PonyRadio_updatetimer", "15.0", "How often to check for new song info in seconds",FCVAR_PLUGIN|FCVAR_NOTIFY, true, 15.0, true, 60.0);`
-** `CreateConVar("PonyRadio_volume", "30", "Default Volume Percent",FCVAR_PLUGIN|FCVAR_NOTIFY, true, 0.0, true, 100.0);`
-** `CreateConVar("PonyRadio_Advertchance", "50", "Chance of advertisement of radio playing ",FCVAR_PLUGIN|FCVAR_NOTIFY, true, 0.0, true, 100.0);`
+
+CVars:
+
+* `CreateConVar("PonyRadio_updatetimer", "15.0", "How often to check for new song info in seconds",FCVAR_PLUGIN|FCVAR_NOTIFY, true, 15.0, true, 60.0);`
+* `CreateConVar("PonyRadio_volume", "30", "Default Volume Percent",FCVAR_PLUGIN|FCVAR_NOTIFY, true, 0.0, true, 100.0);`
+* `CreateConVar("PonyRadio_Advertchance", "50", "Chance of advertisement of radio playing ",FCVAR_PLUGIN|FCVAR_NOTIFY, true, 0.0, true, 100.0);`
 
 ### TODO List
 
