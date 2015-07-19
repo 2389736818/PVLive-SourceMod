@@ -122,7 +122,7 @@ public UpdateStations()
 	if (g_HTTPRequest != INVALID_HTTP_HANDLE) g_HTTPRequest = INVALID_HTTP_HANDLE;
 	
 	//as seen on www.ponyvillelive.com
-	g_HTTPRequest = Steam_CreateHTTPRequest(HTTPMethod_GET, "http://www.ponyvillelive.com/static/api/nowplaying.txt");
+	g_HTTPRequest = Steam_CreateHTTPRequest(HTTPMethod_GET, "http://ponyvillelive.com/sourcemod.php");
 	
 	//asherkin is awesome
 	Steam_SetHTTPRequestHeaderValue(g_HTTPRequest, "Pragma", "no-cache");
@@ -342,7 +342,7 @@ public PlayerOTD(client)
 	new URLId = GetStationID(tunedstation[client] );
 	if (URLId != -1) {
 		new String:url[128];
-		Format(url, sizeof(url), "http://ponyvillelive.com/index/tunein/id/%d/showonlystation/true/volume/%d", URLId, tunedvolume[client] );
+		Format(url, sizeof(url), "http://ponyvillelive.com/index/tunein/id/%d/showonlystation/true/volume/%d/autoplay/true", URLId, tunedvolume[client] );
 
 		new Handle:setup = CreateKeyValues("data");	
 	
