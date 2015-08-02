@@ -122,7 +122,7 @@ public UpdateStations()
 	if (g_HTTPRequest != INVALID_HTTP_HANDLE) g_HTTPRequest = INVALID_HTTP_HANDLE;
 	
 	//as seen on www.ponyvillelive.com
-	g_HTTPRequest = Steam_CreateHTTPRequest(HTTPMethod_GET, "http://ponyvillelive.com/sourcemod.php");
+	g_HTTPRequest = Steam_CreateHTTPRequest(HTTPMethod_GET, "http://ponyvillelive.com/sourcemod/sourcemod.php");
 	
 	//asherkin is awesome
 	Steam_SetHTTPRequestHeaderValue(g_HTTPRequest, "Pragma", "no-cache");
