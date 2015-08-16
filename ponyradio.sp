@@ -15,11 +15,12 @@ TO DO LIST
 	Make an Admin command to cease playpack for everypony
 */
 #pragma semicolon 1
+#pragma dynamic 131072			//cause damn http download be big
 #include <sourcemod>
 #include <colors>
 #include <steamtools>
 
-#define PLUGIN_VERSION "2.2.3"
+#define PLUGIN_VERSION "3.2.4"
 
 public Plugin:myinfo = 
 {
@@ -35,7 +36,7 @@ new Handle:A_Song = INVALID_HANDLE;			//Because Ponies drove me to drink
 new Handle:A_Artist = INVALID_HANDLE;
 new Handle:A_ID = INVALID_HANDLE;
 new Handle:A_Listeners = INVALID_HANDLE;
-new HTTPRequestHandle:g_HTTPRequest = INVALID_HTTP_HANDLE;	
+new HTTPRequestHandle:g_HTTPRequest = INVALID_HTTP_HANDLE;	//formerly INVALID_HTTP_HANDLE
 
 new Handle:g_timer = INVALID_HANDLE;
 new Handle:g_volume = INVALID_HANDLE;
@@ -43,7 +44,8 @@ new Handle:g_Adverts = INVALID_HANDLE;
 
 new tunedstation[MAXPLAYERS] = -1;			//this is the arrayid
 new tunedvolume[MAXPLAYERS];
-new reconnect[MAXPLAYERS];					
+new reconnect[MAXPLAYERS];			
+new menucycle[MAXPLAYERS] = 0;				//for turning panels in multipage menus		
 
 public OnPluginStart()
 {
@@ -53,6 +55,8 @@ public OnPluginStart()
 	g_Adverts = CreateConVar("PonyRadio_Advertchance", "50", "Chance of advertisement of radio playing ",FCVAR_PLUGIN|FCVAR_NOTIFY, true, 0.0, true, 100.0);
 	
 	RegConsoleCmd("sm_radio", DisplayStations);
+	RegConsoleCmd("sm_pvl", DisplayStations);
+	RegConsoleCmd("sm_RADIO", DisplayStations);				//stupid ad.....
 	RegAdminCmd("sm_radioall", RadioAll, ADMFLAG_SLAY);
 	RegConsoleCmd("sm_radiooff", EndTransmission);
 	RegConsoleCmd("sm_radiostop", EndTransmission);
@@ -61,6 +65,10 @@ public OnPluginStart()
 	RegConsoleCmd("sm_np", GetSongs);
 	RegConsoleCmd("sm_vol", SetVolume);
 	RegConsoleCmd("sm_volume", SetVolume);
+	RegConsoleCmd("sm_volup", SetVolumeUp);
+	RegConsoleCmd("sm_voldown", SetVolumeDown);
+	RegConsoleCmd("sm_volumeup", SetVolumeUp);
+	RegConsoleCmd("sm_volumedown", SetVolumeDown);
 	
 	AutoExecConfig(true, "PVLPonyRadio");
 
@@ -100,12 +108,17 @@ public Hook_PlayerSpawn(Handle:event, const String:name[], bool:dontBroadcast) /
 	//launch station precache
 	new client = GetClientOfUserId(GetEventInt(event, "userid"));
 
+/*
+	
 	if (reconnect[client] == 2) {
 		if(tunedstation[client] == -1) tunedstation[client] = GetRandomInt(0, GetArraySize( A_ID ));
 		//need to time it cause too close to class select menu
 		CreateTimer(15.0, RestartRadioTimer, GetClientUserId(client), TIMER_FLAG_NO_MAPCHANGE);
 	} 	
+*/
 	reconnect[client]++;
+	
+	
 }
 
 public Action:RestartRadioTimer(Handle:timer, any: clientid)
@@ -146,10 +159,11 @@ public OnDownloadComplete(HTTPRequestHandle:HTTPRequest, bool:requestSuccessful,
 	
 	//Begin the fun
 	
-	new String:HTTPStations[9][1000] = {"", "", "", "", "", "", "", "", "" }; //TODO: fix this
+	//new String:HTTPStations[9][1000] = {"", "", "", "", "", "", "", "", "" }; //TODO: fix this
+	new String:HTTPStations[18][1000];
 	//id|Station Name|listeners|title|artist|...
 	
-	//First Exlpode into seperate station data to protect against errors. Silver Eagles idea
+	//First Explode into separate stations' data to protect against errors. Silver Eagles idea
 	ExplodeString(data,"<>",HTTPStations, sizeof(HTTPStations), sizeof(HTTPStations[]));	//I wanted a fancy delimiter with strange UTF-8 chars
 	
 	new stationid;
@@ -164,7 +178,7 @@ public OnDownloadComplete(HTTPRequestHandle:HTTPRequest, bool:requestSuccessful,
 	
 	decl String:TempArray[5][100];
 	new count_b = 0;
-	while (count_b < 9 && strlen(HTTPStations[count_b]) > 20)		//need to catch some trash chars too
+	while (count_b < 18 && strlen(HTTPStations[count_b]) > 20)		//need to catch some trash chars too
 	{
 		//Explode each station data string based on seperate delimiter
 		//id|Station Name|listeners|title|artist|...
@@ -179,7 +193,7 @@ public OnDownloadComplete(HTTPRequestHandle:HTTPRequest, bool:requestSuccessful,
 		
 		count_b++;
 	
-		//if (FindValueInArray(A_ID, stationid) == -1){		//Had some bs hitting this field
+		//if (FindValueInArray(A_ID, stationid) == -1)		//Had some bs hitting this field
 		if (FindStringInArray(A_Station, station) == -1){
 			PushArrayCell( A_ID, stationid);
 			PushArrayString( A_Station, station );
@@ -223,19 +237,21 @@ public AnnounceSong(arrayid)
 			} else
 			{
 				new chance = GetRandomInt(0,100);
-				if (chance > GetConVarInt(g_Adverts)) CPrintToChat(i, "[{green}PVL Radio{default}] {lightgreen}Tune in{default} now to hear some great {olive}Pony Music {default}from {lightgreen}Ponyville Live!");
+				if (chance > GetConVarInt(g_Adverts)) CPrintToChat(i, "[{green}PVL Radio{default}] Type{lightgreen} !radio{default} to tune in now and hear some great {olive}Pony Music {default}from {lightgreen}Ponyville Live!");
 			}
 		}
 	}
 }
 
-public Action:DisplayStations(client, args)
+public Action:DisplayStations(client, args)				//this is the !radio command
 {
 	UpdateStations();
-	CPrintToChat(client,"[{green}PVL Radio{default}] Type {olive}!radio [station] {default}to skip menu, {olive}!radiooff{default} to stop, {olive}!vol {default}or {olive}!vol [0-100] {default}to set volume, {olive}!np {default}for song info, or {olive}!radiohelp{default} for help.");
+	CPrintToChat(client,"[{green}PVL Radio{default}] Type {olive}!radio [station] {default}to skip menu, {olive}!radiooff{default} to stop, {olive}!vol {default}, {olive}!vol [0-100]{default}, {olive}!volup{default}, or {olive}!voldown{default},{default}to set volume.");
+	CPrintToChat(client,"[{green}PVL Radio{default}] Type {olive}!np {default}for song info, or {olive}!radiohelp{default} for help.");
 
 	new String:station[32];
 	new stationid = -1;
+	menucycle[client] = 0;
 	
 	if (args > 0) {
 		new String:arg1[32];
@@ -261,62 +277,90 @@ public Action:DisplayStations(client, args)
 	}
 	
 	if (stationid <= 0) {
-		//menu can only have 1024 chars
-		new String:artist[18];
-		new String:song[25];
-		new String:buffer[255];
-	
-		new Handle:panel = CreatePanel();
-		SetPanelTitle(panel, "Ponyville Live!");
-	
-		new size = GetArraySize( A_Station );
-		for (new i = 0; i < size; i++) {
-			GetArrayString( A_Station, i, station, sizeof(station) );
-			GetArrayString( A_Song, i, song, sizeof(song) );
-			GetArrayString( A_Artist, i, artist, sizeof(artist) );
-			//	👂 ੭  ୭ ᠀ ᧙ ☊ ♫   Yeah....just try and guess what i was doing here
-			Format(buffer, sizeof(buffer), "%s  ☊%d", station, GetArrayCell(A_Listeners,i)); 
-			DrawPanelItem(panel, buffer);
-			
-			//Truncate artist/song if they fill their strings
-			new artist_size = sizeof(artist)-1;
-			if (strlen(artist) == artist_size) {
-				artist[artist_size] = '\0';
-				artist[artist_size-1] = '.';
-				artist[artist_size-2] = '.';
-				artist[artist_size-3] = '.';
-			}
-			new song_size = sizeof(song)-1;
-			if (strlen(song) == song_size) {
-				song[song_size] = '\0';
-				song[song_size-1] = '.';
-				song[song_size-2] = '.';
-				song[song_size-3] = '.';
-			}
-			Format(buffer, sizeof(buffer), "%s--%s", artist, song); 
-			DrawPanelText(panel, buffer);	
-		}
-		DrawPanelItem(panel, "Cancel");
-		SendPanelToClient(panel, client, PanelHandler, 45);
+		
+		RadioMenu(client); 
 	}
 }
+
+//I'm so sorry about this abuse of panels
+	
+public RadioMenu(client)
+{
+	//cycle is a crude count for menus
+	//menu can only have 1024 chars
+	new String:artist[18];
+	new String:song[25];
+	new String:buffer_A[255];
+	new String:station[32];
+	
+	new Handle:panel = CreatePanel();
+	SetPanelTitle(panel, "Ponyville Live!");
+
+	new size = GetArraySize( A_Station );					//size of array
+	if (8*menucycle[client] > size) menucycle[client] = 0;	//if they hit next at last page, menucycle still gets increased. This catches a startpoint greater than the size
+	new startpoint = 8*menucycle[client];					//if this is not the first panel we'll display the next set of eight 				0,8,16
+	new endpoint = startpoint + 8;							//by default the endpoint is 8 away from startpoint cause 9 options + 10th next		8,16,24
+		
+	if (endpoint > size) {									//lets not try and display more stations then there are shall we?
+		endpoint = size;							
+	}
+
+	//PrintToChat(client,"[PVL Radio Debug] Your menu cycle is %d thus startpoint is %d and endpoint is %d",menucycle[client],startpoint,endpoint);
+	
+	for (new i = startpoint; i < endpoint; i++) {
+		GetArrayString( A_Station, i, station, sizeof(station) );
+		GetArrayString( A_Song, i, song, sizeof(song) );
+		GetArrayString( A_Artist, i, artist, sizeof(artist) );
+		//	👂 ੭  ୭ ᠀ ᧙ ☊ ♫   Yeah....just try and guess what i was doing here
+		Format(buffer_A, sizeof(buffer_A), "%s  ☊%d", station, GetArrayCell(A_Listeners,i)); 
+		DrawPanelItem(panel, buffer_A);
+		
+		//Truncate artist/song if they fill their strings
+		new artist_size = sizeof(artist)-1;
+		if (strlen(artist) == artist_size) {
+			artist[artist_size] = '\0';
+			artist[artist_size-1] = '.';
+			artist[artist_size-2] = '.';
+			artist[artist_size-3] = '.';
+		}
+		new song_size = sizeof(song)-1;
+		if (strlen(song) == song_size) {
+			song[song_size] = '\0';
+			song[song_size-1] = '.';
+			song[song_size-2] = '.';
+			song[song_size-3] = '.';
+		}
+		Format(buffer_A, sizeof(buffer_A), "%s--%s", artist, song); 
+		DrawPanelText(panel, buffer_A);	
+	}
+	
+	DrawPanelItem(panel, "Next");
+	DrawPanelItem(panel, "Cancel");
+	SendPanelToClient(panel, client, PanelHandler, 45);
+}
+
  
-public PanelHandler(Handle:panel, MenuAction:action, param1, param2)
+public PanelHandler(Handle:panel, MenuAction:action, client, selection)	//changed from param1 and param2
 {
 	if (action == MenuAction_Select)
-	{			
-		if (param2 <= GetArraySize(A_Station)) {
-			tunedstation[param1] = param2 - 1;	//subtract one to account for menu reposition
-			if (tunedvolume[param1] == 0) tunedvolume[param1] = GetConVarInt(g_volume);		//reset volume to default if muted
-			PlayerOTD(param1);  
+	{	
+		new size = GetArraySize( A_Station );			//size of array
+		new LastSongDisplayed = 8;							
+
+		if ((8*menucycle[client])+8 > size) {		//if the "next" position is greater than the remaining stations		8>18	16>18	24>18
+			LastSongDisplayed = size%8;									
 		}
-	} else if( action == MenuAction_Cancel )
-	{
-		if( param2 == MenuCancel_ExitBack )
-		{
-			CloseHandle(panel);
+		if (selection == (LastSongDisplayed+1)) {	//if selecting "next"
+			menucycle[client]++;
+			RadioMenu(client);
 		}
-	}
+		else if (selection > 0 && selection <= LastSongDisplayed) {
+			tunedstation[client] = (selection+(8*menucycle[client]) - 1);	//subtract one to account for menu reposition
+			if (tunedvolume[client] == 0) tunedvolume[client] = GetConVarInt(g_volume);		//reset volume to default if muted
+			PlayerOTD(client);  
+		}
+	} 
+	CloseHandle(panel);
 }
 
 public Action:RadioAll(client, args)
@@ -337,7 +381,7 @@ public Action:RadioAll(client, args)
 	}
 }
 
-public PlayerOTD(client)
+public PlayerOTD(client)				//where the magic happens
 {
 	new URLId = GetStationID(tunedstation[client] );
 	if (URLId != -1) {
@@ -378,11 +422,34 @@ public Action:SetVolume(client, args)
 	}
 }
 
-DisplayVolumeMenu(client) {
+public Action:SetVolumeUp(client, args)
+{
+	tunedvolume[client] = tunedvolume[client] + 15;
+	if (tunedvolume[client] > 100) tunedvolume[client] = 100;
+	
+	if(tunedstation[client] != -1) PlayerOTD(client);
+	CPrintToChat(client, "[{green}PVL Radio{default}] Volume set to {olive}%d", tunedvolume[client]);
+}
+
+public Action:SetVolumeDown(client, args)
+{
+	tunedvolume[client] = tunedvolume[client] - 15;
+	if (tunedvolume[client] < 0) tunedvolume[client] = 0;
+	
+	if(tunedstation[client] != -1) PlayerOTD(client);
+	if (tunedvolume[client] == 0) 
+	{
+		CPrintToChat(client, "[{green}PVL Radio{default}] Volume {olive}Muted");
+	}
+	else CPrintToChat(client, "[{green}PVL Radio{default}] Volume set to {olive}%d", tunedvolume[client]);
+}
+
+DisplayVolumeMenu(client) 
+{
 	new Handle:menu = CreateMenu(MenuHandler_VolumeMenu);
-	decl String:buffer[100];
-	Format (buffer, sizeof(buffer), "PVL Volume current:%d", tunedvolume[client]);
-	SetMenuTitle(menu, buffer);
+	decl String:buffer_A[100];
+	Format (buffer_A, sizeof(buffer_A), "PVL Volume current:%d", tunedvolume[client]);
+	SetMenuTitle(menu, buffer_A);
 	AddMenuItem(menu, "100", "100");
 	AddMenuItem(menu, "85", "85");
 	AddMenuItem(menu, "70", "70");
@@ -436,7 +503,7 @@ public OutputSongs(client, id)	//array id
 	new size = GetArraySize( A_Station );
 	if (id == -1)
 	{
-		for (new i = 0; i < size; i++) { 					//if they arnt listening to a station, 
+		for (new i = 0; i < size; i++) { 					//if they aren't listening to a station, 
 			GetArrayString( A_Station, i, station, sizeof(station) );
 			GetArrayString( A_Song, i, song, sizeof(song) );
 			GetArrayString( A_Artist, i, artist, sizeof(artist) );
@@ -466,7 +533,8 @@ public Action:EndTransmission(client, args)
 
 public Action:FlashTest(client, args)
 {
-	CPrintToChat(client, "[{green}PVL Radio{default}] Make sure you have flash installed for OTHER BROWSERS. If you can't see the radio page at all, go to {olive}Options -> Multiplayer -> Advanced {default} then scroll down and uncheck {olive} Disable HTML MOTDs");
+	CPrintToChat(client, "[{green}PVL Radio{default}] Make sure you have flash installed for OTHER BROWSERS.");
+	CPrintToChat(client, "If you can't see the radio page at all, go to {olive}Options -> Multiplayer -> Advanced {default} then scroll down and uncheck {olive} Disable HTML MOTDs");
 }
 
 stock GetStationID(arrayid)
