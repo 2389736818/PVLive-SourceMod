@@ -65,11 +65,11 @@ foreach($api_result['result'] as $np_row)
      * StationID|StationName|Listeners|SongName|SongArtist
      */
     $station_row = array(
-        $np_row['station']['id'],
-        $np_row['station']['name'],
-        $np_row['listeners']['total'],
-        $np_row['current_song']['title'],
-        $np_row['current_song']['artist'],
+        (int)$np_row['station']['id'],
+        filterString($np_row['station']['name']),
+        (int)$np_row['listeners']['total'],
+        filterString($np_row['current_song']['title']),
+        filterString($np_row['current_song']['artist']),
     );
 
     $nowplaying[] = implode('|', $station_row);
@@ -80,3 +80,11 @@ $nowplaying_raw = implode('<>', $nowplaying);
 // Write nowplaying data to file, then to screen.
 @file_put_contents($cache_path, $nowplaying_raw);
 echo $nowplaying_raw;
+
+// Prevent strings from containing the delimiter characters.
+function filterString($string)
+{
+    $string = str_replace('|', '-', $string);
+    $string = str_replace('<>', '-', $string);
+    return $string;
+}
