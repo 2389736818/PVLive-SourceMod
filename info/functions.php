@@ -12,13 +12,8 @@ function getServerInfo($config_path, $cache_path, $cache_lifetime = 10)
 
 	if ($cache_result)
 		return $cache_result;
-	
-	// Attempt to load configuration.
-	if (!file_exists($config_path))
-		die('Could not find configuration file at "'.$config_path.'"!');
 
-	$config_raw = file_get_contents($config_path);
-	$config = json_decode($config_raw, TRUE);
+	$config = getServerConfig($config_path);
 
 	// Generate server info from scratch.
 	$server_info = array();
@@ -43,6 +38,18 @@ function getServerInfo($config_path, $cache_path, $cache_lifetime = 10)
 	writeToCache($server_info, $cache_path);
 
 	return $server_info;
+}
+
+function getServerConfig($config_path)
+{
+	// Attempt to load configuration.
+	if (!file_exists($config_path))
+		die('Could not find configuration file at "'.$config_path.'"!');
+
+	$config_raw = file_get_contents($config_path);
+	$config = json_decode($config_raw, TRUE);
+
+	return $config;
 }
 
 function readFromCache($cache_path, $cache_lifetime)

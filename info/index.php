@@ -12,7 +12,7 @@ if (!empty($_GET['server']))
 {
 	$server = $_GET['server'];
 	if (isset($all_servers[$server]))
-		$all_servers = array($all_servers[$server]);
+		$all_servers = array($server => $all_servers[$server]);
 	else
 		die('Invalid server specified!');
 }
@@ -66,7 +66,7 @@ if (!empty($_GET['server']))
 	</style>
 </head>
 <body>
-<? foreach($all_servers as $server): ?>
+<? foreach($all_servers as $server_key => $server): ?>
 <div class="global">
 	<div class="server_name">
 	<?
@@ -132,7 +132,7 @@ if (!empty($_GET['server']))
 		<? endif; ?>
 	</div>
 	<div style="text-align:center; padding:2px 0px 6px 0px;">
-		<a href="./connect.php?<?=http_build_query(array('host' => $server['Info']['IP'], 'port' => $server['Info']['Port'])) ?>"><span class="btn_custom">
+		<a href="./connect.php?server=<?=$server_key ?>"><span class="btn_custom">
 			JOIN THIS SERVER
 		</span>
 		</a>
