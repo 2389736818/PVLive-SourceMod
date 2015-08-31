@@ -47,14 +47,14 @@ div.info_line_right	{
 }
 
 div.server_name {
-	margin:2px; 
-	height:28px;
-	padding:2px;
+	margin: 2px; 
+	height: 28px;
+	padding: 2px;
 	border:solid;
 	border-width:1px; 
-	overflow:hidden; 
+	overflow: hidden; 
 	font-weight:bold;
-	background: #C0C5C7;
+	background: #737D82;
 	color:#000000;
 }
 
@@ -68,7 +68,7 @@ div.scrollable {
 	overflow-y:auto; 
 	position:relative;
 	color: #444444; 
-	background: #C0C5C7;
+	background: #737D82;
 }
 div.scrollable_on_c01 { 
 	float:left; 
@@ -111,7 +111,7 @@ span.server_status.offline	{
 
 .btn_wrapper {
 	text-align:center;
-	padding:2px 0px 6px 0px;
+	padding: 4px 10px 4px 10px;
 }
 a.btn_custom {
 	display: block;
@@ -123,7 +123,7 @@ a.btn_custom {
 
 	text-align:center;
 	text-decoration:none;
-	font-size: 14px;
-	padding: 4px;
-	font-weight:bold; 
+	font-size: 16px;
+	padding: 6px;
+	font-weight: normal;
 }
