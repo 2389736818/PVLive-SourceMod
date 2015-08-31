@@ -90,7 +90,7 @@ if (!empty($_GET['server']))
 	</div>
 	<div class="btn_wrapper">
 		<a class="btn_custom" href="./connect.php?server=<?=$server_key ?>">
-			JOIN THIS SERVER
+			Join Server
 		</a>
 	</div>
 </div>
