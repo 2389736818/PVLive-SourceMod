@@ -1,0 +1,57 @@
+"Phrases"
+{
+	"Tune in"
+	{
+		"en"		"[{green}PVL Radio{default}] {lightgreen}Tune in{default} now to hear some great {olive}Pony Music {default}from {lightgreen}Ponyville Live!"
+	}
+
+	"Type"
+	{
+		"en"		"[{green}PVL Radio{default}] Type {olive}!radio [station] {default}to skip menu, {olive}!radiooff{default} to stop, {olive}!vol {default}or {olive}!vol [0-100] {default}to set volume, {olive}!np {default}for song info, or {olive}!radiohelp{default} for help."
+	}
+
+	"More than one radio station matches that name"
+	{
+		"en"		"[{green}PVL Radio{default}] More than one radio station matches that name"
+	}
+
+	"No radio station matches that name"
+	{
+		"en"		"[{green}PVL Radio{default}] No radio station matches that name."
+	}
+
+	"!radiooff !vol !np"
+	{
+		"en"		"[{green}PVL Radio{default}] An admin has turned on your radio! Type {olive}!radiooff{default} to end playback, {olive}!vol{default} to set volume or open vol menu, {olive}!np{default} for current song info"
+	}
+
+	"Listen to a radio yourself first"
+	{
+		"en"		"[{green}PVL Radio{default}] Listen to a radio yourself first!"
+	}
+
+	"Volume is Already set to"
+	{
+		"en"		"[{green}PVL Radio{default}] Volume is Already set to {olive}%d"
+	}
+
+	"Volume set to"
+	{
+		"en"		"[{green}PVL Radio{default}] Volume set to {olive}%d"
+	}
+
+	"playing"
+	{
+		"en"		"[{green}PVL Radio{default}] {lightgreen}%s{default} is playing {olive}%s {default}-- {lightgreen}%s"
+	}
+
+	"playingtwo"
+	{
+		"en"		"[{green}PVL Radio{default}] {lightgreen}%s{default} is playing {olive}%s {default}-- {lightgreen}%s"
+	}
+
+	"Make sure you have flash installed for OTHER BROWSERS"
+	{
+		"en"		"[{green}PVL Radio{default}] Make sure you have flash installed for OTHER BROWSERS. If you can't see the radio page at all, go to {olive}Options -> Multiplayer -> Advanced {default} then scroll down and uncheck {olive} Disable HTML MOTDs"
+	}
+}
