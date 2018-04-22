@@ -1,3 +1,5 @@
+Note: This is the old version
+
 # Ponyville Live! Presents the PVL SourceMod Pony Radio Player
 
 Ponyville Live!, the MLP fandom's largest multimedia network, is pleased to present all of our Pony and Brony music themed radio stations in a fantastic and easy to use sourcemod plugin!
